@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" ?> 
+<PinConfig>
+  <PinBoards>
+    <Board name="Edison-ArdinoBoard">
+      <Pins PreConfigPin="214" PreConfigValue="HIGH" PostConfigValue="LOW">
+        <Pin number="48" Mode="GPIO" DirectionPin="255" PullupPin="218" />
+        <Pin number="48" DirectionPin="255" PullupPin="218">
+          <Modes MuxPin="263" DefaultMode="GPIO">
+            <add type="GPIO" />
+            <add type="PWM" PWMChip="0" PWMChannel="0" />
+          </Modes>
+        </Pin>
+      </Pins>
+    </Board>
+  </PinBoards>
+</PinConfig>

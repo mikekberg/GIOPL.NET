@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GIOPL", "GIOPL\GIOPL.csproj", "{7E0B8C5E-645F-4070-BECC-0C581E143A6B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestingGPIO", "..\TestingGPIO\TestingGPIO.csproj", "{70F17F1A-A76C-4F55-A435-7A245AA01872}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GIOPL.SparkFunBoards", "GIOPL.SparkFun\GIOPL.SparkFunBoards.csproj", "{4369690C-2180-4866-88AE-7713C40D9247}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7E0B8C5E-645F-4070-BECC-0C581E143A6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E0B8C5E-645F-4070-BECC-0C581E143A6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E0B8C5E-645F-4070-BECC-0C581E143A6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E0B8C5E-645F-4070-BECC-0C581E143A6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70F17F1A-A76C-4F55-A435-7A245AA01872}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70F17F1A-A76C-4F55-A435-7A245AA01872}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70F17F1A-A76C-4F55-A435-7A245AA01872}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70F17F1A-A76C-4F55-A435-7A245AA01872}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4369690C-2180-4866-88AE-7713C40D9247}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4369690C-2180-4866-88AE-7713C40D9247}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4369690C-2180-4866-88AE-7713C40D9247}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4369690C-2180-4866-88AE-7713C40D9247}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
