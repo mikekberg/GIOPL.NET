@@ -33,11 +33,36 @@ namespace GIOPL.SparkFun
     */
     public class NDOF13033 : IDisposable
     {
+        public const byte WHO_AM_I_G = 0x0F;
+        public const byte WHO_AM_I_XM = 0x0F;
+
+
         public byte GyroAddress { get; private set; }
         public byte AccelerometerAddress { get; private set; }
-        public gyro_config GyroConfig { get; set; }
+        public Gyro_Config GyroConfig { get; set; } = new Gyro_Config();
         private II2CDevice GyroI2c { get; set; }
         private II2CDevice AccelI2C { get; set; }
+
+        private GyroData _lastestGyroData = new GyroData();
+        public GyroData LatestGyroData
+        {
+            get
+            {
+                if (GyroDataAvalible)
+                {
+                    var newGyro = ReadGyro();
+
+                    _lastestGyroData.RawX = newGyro.X;
+                    _lastestGyroData.RawY = newGyro.Y;
+                    _lastestGyroData.RawZ = newGyro.Z;
+                    _lastestGyroData.X = GyroConfig.GyroResolution * newGyro.X;
+                    _lastestGyroData.Y = GyroConfig.GyroResolution * newGyro.Y;
+                    _lastestGyroData.Z = GyroConfig.GyroResolution * newGyro.Z;
+                }
+
+                return _lastestGyroData;
+            }
+        }
 
         public bool GyroDataAvalible
         {
@@ -52,26 +77,19 @@ namespace GIOPL.SparkFun
             GyroAddress = gyroAddress;
             AccelerometerAddress = accelerometerAddress;
 
-            // Set Config Defaults
-            this.GyroConfig = new gyro_config(0x0F, 0x00, 0x88, 0x00, 0x00);
-
             GyroI2c = i2cService.OpenDevice(gyroAddress);
             AccelI2C = i2cService.OpenDevice(accelerometerAddress);
 
-            var gyroCheck = GyroI2c.ReadByte(DOFConsts.WHO_AM_I_G);
-            var accelCheck = AccelI2C.ReadByte(DOFConsts.WHO_AM_I_XM);
+            var gyroCheck = GyroI2c.ReadByte(NDOF13033.WHO_AM_I_G);
+            var accelCheck = AccelI2C.ReadByte(NDOF13033.WHO_AM_I_XM);
 
             if (gyroCheck != 0xD4) throw new NDOF13033DeviceException("Gyro Failed Who_Am_I Test. Got: 0x" + gyroCheck.ToString("X2") + ", Expected: 0xD4");
             if (accelCheck != 0x49) throw new NDOF13033DeviceException("Accelerometer Failed Who_Am_I Test. Got: 0x" + accelCheck.ToString("X2") + ", Expected: 0x49");
         }
 
-        public void InitGyro()
+        public void Init()
         {
-            GyroI2c.WriteByte(DOFConsts.CTRL_REG1_G, GyroConfig.OutputDataRate);
-            GyroI2c.WriteByte(DOFConsts.CTRL_REG2_G, GyroConfig.HighPassFilter);
-            GyroI2c.WriteByte(DOFConsts.CTRL_REG3_G, GyroConfig.InteruptDRDY);
-            GyroI2c.WriteByte(DOFConsts.CTRL_REG4_G, GyroConfig.Scale);
-            GyroI2c.WriteByte(DOFConsts.CTRL_REG5_G, GyroConfig.FIFOHPFINT1);
+            GyroConfig.InitGyro(this.GyroI2c);
         }
 
         public GyroData ReadGyro()
@@ -81,9 +99,9 @@ namespace GIOPL.SparkFun
 
             return new GyroData()
             {
-                gx = ((data[1] << 8) | data[0]),
-                gy = ((data[3] << 8) | data[2]),
-                gz = ((data[5] << 8) | data[4])
+                X = ((data[1] << 8) | data[0]),
+                Y = ((data[3] << 8) | data[2]),
+                Z = ((data[5] << 8) | data[4])
             };
         }
 
@@ -98,11 +116,14 @@ namespace GIOPL.SparkFun
             public NDOF13033DeviceException(string message) : base(message) { }
         }
 
-        public struct GyroData
+        public class GyroData
         {
-            public int gx;
-            public int gy;
-            public int gz;
+            public double RawX = 0;
+            public double RawY = 0;
+            public double RawZ = 0;
+            public double X = 0;
+            public double Y = 0;
+            public double Z = 0;
         }
 
         private static class DOFConsts
@@ -110,12 +131,7 @@ namespace GIOPL.SparkFun
             ////////////////////////////
             // LSM9DS0 Gyro Registers //
             ////////////////////////////
-            public const byte WHO_AM_I_G = 0x0F;
-            public const byte CTRL_REG1_G = 0x20;
-            public const byte CTRL_REG2_G = 0x21;
-            public const byte CTRL_REG3_G = 0x22;
-            public const byte CTRL_REG4_G = 0x23;
-            public const byte CTRL_REG5_G = 0x24;
+            
             public const byte REFERENCE_G = 0x25;
             public const byte STATUS_REG_G = 0x27;
             public const byte OUT_X_L_G = 0x28;
@@ -148,7 +164,7 @@ namespace GIOPL.SparkFun
             public const byte OUT_Y_H_M = 0x0B;
             public const byte OUT_Z_L_M = 0x0C;
             public const byte OUT_Z_H_M = 0x0D;
-            public const byte WHO_AM_I_XM = 0x0F;
+            
             public const byte INT_CTRL_REG_M = 0x12;
             public const byte INT_SRC_REG_M = 0x13;
             public const byte INT_THS_L_M = 0x14;
@@ -222,8 +238,14 @@ namespace GIOPL.SparkFun
             G_SCALE_2000DPS,    // 10:  2000 dps
         };
 
-        public struct gyro_config
+        public class Gyro_Config
         {
+            public const byte CTRL_REG1_G = 0x20;
+            public const byte CTRL_REG2_G = 0x21;
+            public const byte CTRL_REG3_G = 0x22;
+            public const byte CTRL_REG4_G = 0x23;
+            public const byte CTRL_REG5_G = 0x24;
+
             /* CTRL_REG1_G sets output data rate, bandwidth, power-down and enables
             Bits[7:0]: DR1 DR0 BW1 BW0 PD Zen Xen Yen
             DR[1:0] - Output data rate selection
@@ -232,7 +254,7 @@ namespace GIOPL.SparkFun
                  Value depends on ODR. See datasheet table 21.
             PD - Power down enable (0=power down mode, 1=normal or sleep mode)
             Zen, Xen, Yen - Axis enable (o=disabled, 1=enabled)	*/
-            public byte OutputDataRate;
+            public byte OutputDataRate = 0x0F;
 
             /* CTRL_REG2_G sets up the HPF
             Bits[7:0]: 0 0 HPM1 HPM0 HPCF3 HPCF2 HPCF1 HPCF0
@@ -241,7 +263,7 @@ namespace GIOPL.SparkFun
                 10=normal, 11=autoreset on interrupt
             HPCF[3:0] - High pass filter cutoff frequency
                 Value depends on data rate. See datasheet table 26. */
-            public byte HighPassFilter;
+            public byte HighPassFilter = 0x00;
 
             /* CTRL_REG3_G sets up interrupt and DRDY_G pins
             Bits[7:0]: I1_IINT1 I1_BOOT H_LACTIVE PP_OD I2_DRDY I2_WTM I2_ORUN I2_EMPTY
@@ -254,7 +276,7 @@ namespace GIOPL.SparkFun
             I2_ORUN - FIFO overrun interrupt on DRDY_G (0=disable 1=enable)
             I2_EMPTY - FIFO empty interrupt on DRDY_G (0=disable 1=enable) */
             // Int1 enabled (pp, active low), data read on DRDY_G:
-            public byte InteruptDRDY;
+            public byte InteruptDRDY = 0x88;
 
             /* CTRL_REG4_G sets the scale, update mode
             Bits[7:0] - BDU BLE FS1 FS0 - ST1 ST0 SIM
@@ -266,7 +288,7 @@ namespace GIOPL.SparkFun
                 00=disabled, 01=st 0 (x+, y-, z-), 10=undefined, 11=st 1 (x-, y+, z+)
             SIM - SPI serial interface mode select
                 0=4 wire, 1=3 wire */
-            public byte Scale;
+            public byte ScaleAndUpdate = 0x00;
 
             /* CTRL_REG5_G sets up the FIFO, HPF, and INT1
             Bits[7:0] - BOOT FIFO_EN - HPen INT1_Sel1 INT1_Sel0 Out_Sel1 Out_Sel0
@@ -275,16 +297,53 @@ namespace GIOPL.SparkFun
             HPen - HPF enable (0=disable, 1=enable)
             INT1_Sel[1:0] - Int 1 selection configuration
             Out_Sel[1:0] - Out selection configuration */
-            public byte FIFOHPFINT1;
+            public byte FIFOHPFINT1 = 0x00;
 
 
-            public gyro_config(byte outputDataRate = 0x0F, byte highPassFilter = 0x00, byte interuptDRDY = 0x88, byte scale = 0x00, byte fifohpfint1 = 0x00)
+            private gyro_scale _scale;
+            public gyro_scale Scale
             {
-                OutputDataRate = outputDataRate;
-                HighPassFilter = highPassFilter;
-                InteruptDRDY = interuptDRDY;
-                Scale = scale;
-                FIFOHPFINT1 = fifohpfint1;
+                get
+                {
+                    return _scale;
+                }
+                set
+                {
+                    _scale = value;
+
+                    byte temp = ScaleAndUpdate;
+                    temp &= 0xFF ^ (0x3 << 4);
+                    temp |= (byte)((byte)value << 4);
+
+                    ScaleAndUpdate = temp;
+                }
+            }
+
+            public double GyroResolution
+            {
+                get
+                {
+                    switch (_scale)
+                    {
+                        case gyro_scale.G_SCALE_245DPS:
+                            return 245.0 / 32768.0;
+                        case gyro_scale.G_SCALE_500DPS:
+                            return 500.0 / 32768.0;
+                        case gyro_scale.G_SCALE_2000DPS:
+                            return 2000.0 / 32768.0;
+                    }
+
+                    return 0;
+                }
+            }
+
+            public void InitGyro(II2CDevice device)
+            {
+                device.WriteByte(CTRL_REG1_G, this.OutputDataRate);
+                device.WriteByte(CTRL_REG2_G, this.HighPassFilter);
+                device.WriteByte(CTRL_REG3_G, this.InteruptDRDY);
+                device.WriteByte(CTRL_REG4_G, this.ScaleAndUpdate);
+                device.WriteByte(CTRL_REG5_G, this.FIFOHPFINT1);
             }
         }
     }
