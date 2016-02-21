@@ -41,6 +41,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="NDOF13033.cs" />
+    <Compile Include="NDOF13033\AccelScale.cs" />
+    <Compile Include="NDOF13033\DOFConst.cs" />
+    <Compile Include="NDOF13033\GyroConfig.cs" />
+    <Compile Include="NDOF13033\GyroODR.cs" />
+    <Compile Include="NDOF13033\GyroScale.cs" />
+    <Compile Include="NDOF13033\NDOF13033DeviceException.cs" />
+    <Compile Include="NDOF13033\Vector3Data.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
