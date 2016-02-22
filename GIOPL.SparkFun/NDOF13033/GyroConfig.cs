@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace GIOPL.SparkFunBoards.NDOF13033
 {
+    // TODO: Breakup all of these like in AccelConfig.cs
+
     public class GyroConfig
     {
         public const byte CTRL_REG1_G = 0x20;
@@ -67,7 +69,7 @@ namespace GIOPL.SparkFunBoards.NDOF13033
         Out_Sel[1:0] - Out selection configuration */
         public byte FIFOHPFINT1 = 0x00;
 
-        private GyroScale _scale;
+        private GyroScale _scale = GyroScale.G_SCALE_245DPS;
         public double GyroResolution
         {
             get
@@ -86,7 +88,7 @@ namespace GIOPL.SparkFunBoards.NDOF13033
             }
         }
 
-        public void InitGyro(II2CDevice device)
+        public void UpdateGyroConfig(II2CDevice device)
         {
             device.WriteByte(CTRL_REG1_G, this.OutputDataRate);
             device.WriteByte(CTRL_REG2_G, this.HighPassFilter);

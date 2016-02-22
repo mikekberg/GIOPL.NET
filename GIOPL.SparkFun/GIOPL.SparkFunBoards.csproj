@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="NDOF13033.cs" />
+    <Compile Include="NDOF13033\AccelConfig.cs" />
     <Compile Include="NDOF13033\AccelScale.cs" />
     <Compile Include="NDOF13033\DOFConst.cs" />
     <Compile Include="NDOF13033\GyroConfig.cs" />

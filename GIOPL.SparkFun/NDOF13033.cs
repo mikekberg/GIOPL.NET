@@ -41,6 +41,7 @@ namespace GIOPL.SparkFun
         public byte GyroAddress { get; private set; }
         public byte AccelerometerAddress { get; private set; }
         public GyroConfig GyroConfig { get; set; } = new GyroConfig();
+        public AccelConfig AccelConfig { get; set; } = new AccelConfig();
         private II2CDevice GyroI2c { get; set; }
         private II2CDevice AccelI2C { get; set; }
 
@@ -51,14 +52,14 @@ namespace GIOPL.SparkFun
             {
                 if (AccelDataAvalible)
                 {
-                    var newAccel = ReadAccel();
+                    var newAccel = this.ReadAccel();
 
-                    _lastestAccelData.X = newAccel.X;
-                    _lastestAccelData.Y = newAccel.Y;
-                    _lastestAccelData.Z = newAccel.Z;
+                    this._lastestAccelData.X = newAccel.X;
+                    this._lastestAccelData.Y = newAccel.Y;
+                    this._lastestAccelData.Z = newAccel.Z;
                 }
 
-                return _lastestAccelData;
+                return this._lastestAccelData;
             }
         }
 
@@ -69,30 +70,14 @@ namespace GIOPL.SparkFun
             {
                 if (GyroDataAvalible)
                 {
-                    var newGyro = ReadGyro();
+                    var newGyro = this.ReadGyro();
 
-                    _lastestGyroData.X = GyroConfig.GyroResolution * newGyro.X;
-                    _lastestGyroData.Y = GyroConfig.GyroResolution * newGyro.Y;
-                    _lastestGyroData.Z = GyroConfig.GyroResolution * newGyro.Z;
+                    this._lastestGyroData.X = this.GyroConfig.GyroResolution * newGyro.X;
+                    this._lastestGyroData.Y = this.GyroConfig.GyroResolution * newGyro.Y;
+                    this._lastestGyroData.Z = this.GyroConfig.GyroResolution * newGyro.Z;
                 }
 
-                return _lastestGyroData;
-            }
-        }
-
-        public bool AccelDataAvalible
-        {
-            get
-            {
-                return ((0x8 & GyroI2c.ReadByte(DOFConsts.STATUS_REG_A)) != 0);
-            }
-        }
-
-        public bool GyroDataAvalible
-        {
-            get
-            {
-                return (0x8 & GyroI2c.ReadByte(DOFConsts.STATUS_REG_G)) != 0;
+                return this._lastestGyroData;
             }
         }
 
@@ -111,14 +96,40 @@ namespace GIOPL.SparkFun
             if (accelCheck != 0x49) throw new NDOF13033DeviceException("Accelerometer Failed Who_Am_I Test. Got: 0x" + accelCheck.ToString("X2") + ", Expected: 0x49");
         }
 
+        public bool AccelDataAvalible
+        {
+            get
+            {
+                return ((0x8 & this.GyroI2c.ReadByte(DOFConsts.STATUS_REG_A)) != 0);
+            }
+        }
+
+        public bool GyroDataAvalible
+        {
+            get
+            {
+                return (0x8 & this.GyroI2c.ReadByte(DOFConsts.STATUS_REG_G)) != 0;
+            }
+        }
+
         public void Init()
         {
-            GyroConfig.InitGyro(this.GyroI2c);
+            this.UpdateAccelConfig();
+            this.UpdateGyroConfig();
+        }
+
+        public void UpdateAccelConfig()
+        {
+            this.AccelConfig.UpdateAccelConfig(this.AccelI2C);
+        }
+        public void UpdateGyroConfig()
+        {
+            this.GyroConfig.UpdateGyroConfig(this.GyroI2c);
         }
 
         private Vector3Data ReadSensorData(byte sensorAddress)
         {
-            byte[] data = GyroI2c.ReadBytes(sensorAddress, 6);
+            byte[] data = this.GyroI2c.ReadBytes(sensorAddress, 6);
 
             return new Vector3Data()
             {
@@ -130,23 +141,23 @@ namespace GIOPL.SparkFun
 
         public Vector3Data ReadAccel()
         {
-            return ReadSensorData(DOFConsts.OUT_X_L_A);
+            return this.ReadSensorData(DOFConsts.OUT_X_L_A);
         }
 
         public Vector3Data ReadGyro()
         {
-            return ReadSensorData(DOFConsts.OUT_X_L_G);
+            return this.ReadSensorData(DOFConsts.OUT_X_L_G);
         }
 
         public Vector3Data ReadMagnometer()
         {
-            return ReadSensorData(DOFConsts.OUT_X_L_M);
+            return this.ReadSensorData(DOFConsts.OUT_X_L_M);
         }
 
         public void Dispose()
         {
-            GyroI2c.Close();
-            AccelI2C.Close();
+            this.GyroI2c.Close();
+            this.AccelI2C.Close();
         }
     }
 }
