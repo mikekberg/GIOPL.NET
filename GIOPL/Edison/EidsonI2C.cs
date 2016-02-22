@@ -91,12 +91,11 @@ namespace GIOPL.Edison
         {
             return MRAAInterop.mraa_i2c_read_byte_data(this.device, subaddress);
         }
-
-        public byte[] ReadBytes(byte subaddress)
+        public byte[] ReadBytes(byte subaddress, int length)
         {
-            byte[] data = new byte[6];
+            byte[] data = new byte[length];
 
-            MRAAInterop.mraa_i2c_read_bytes_data(this.device, subaddress, data, 6);
+            MRAAInterop.mraa_i2c_read_bytes_data(this.device, subaddress, data, length);
 
             return data;
         }

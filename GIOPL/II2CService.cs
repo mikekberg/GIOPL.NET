@@ -16,9 +16,9 @@ namespace GIOPL
         int Read(byte[] buffer);
         byte ReadByte();
         byte ReadByte(byte subaddress);
-        byte[] ReadBytes(byte subaddress);
+        byte[] ReadBytes(byte subaddress, int length);
         void Write(byte[] buffer);
         void WriteByte(byte value);
-        void WriteByte(byte preData, byte data);
+        void WriteByte(byte subAddress, byte data);
     }
 }
